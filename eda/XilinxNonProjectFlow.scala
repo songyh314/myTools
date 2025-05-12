@@ -115,21 +115,21 @@ case class XilinxNonProjectFlow(
       }
       script += s"\nwrite_checkpoint -force ${rtl.getName()}_synth.dcp\n"
       script += s"report_timing_summary -delay_type max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -file syn_timing.rpt\n"
-      script += s"report_timing_summary -warn_on_violation\n"
     }
 
     def addImplTask(): Unit = {
       script += s"opt_design\n"
       script += s"place_design -directive Explore\n"
-      script += s"report_timing\n"
+//      script += s"report_timing\n"
       script += s"write_checkpoint -force ${rtl.getName()}_after_place.dcp\n"
       script += s"phys_opt_design\n"
-      script += s"report_timing\n"
+//      script += s"report_timing\n"
       script += s"write_checkpoint -force ${rtl.getName()}_after_place_phys_opt.dcp\n"
       script += s"route_design\n"
       script += s"write_checkpoint -force ${rtl.getName()}_after_route.dcp\n"
-      script += s"report_timing\n"
+//      script += s"report_timing\n"
       script += s"phys_opt_design\n"
+      script += s"report_timing_summary -delay_type max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -file impl_timing.rpt\n"
       script += s"report_utilization\n"
       script += s"report_timing_summary -warn_on_violation\n"
       script += s"report_pulse_width -warn_on_violation -all_violators\n"
@@ -141,6 +141,7 @@ case class XilinxNonProjectFlow(
       case SYN => {
         addXdc()
         addSynTask()
+        script += s"report_timing_summary -warn_on_violation\n"
         script += s"report_utilization\n"
       }
       case IMPL => {
