@@ -8,53 +8,61 @@ import scala.collection.mutable
 trait simEnv {
   type I
   type O
-  val drvQueue = mutable.Queue[I]()
-  val drvMon = mutable.Queue[I]()
-  val refQueue = mutable.Queue[O]()
-  val resQueue = mutable.Queue[O]()
-  @volatile private var stop: Boolean = false
-  def clockDomain:ClockDomain
+  val drvQueue                = mutable.Queue[I]()
+  val drvMon                  = mutable.Queue[I]()
+  val refQueue                = mutable.Queue[O]()
+  val resQueue                = mutable.Queue[O]()
+  @volatile var stop: Boolean = false
 
-  def Driver():Unit
-  def Monitor():Unit
+  val dutClockDomain: ClockDomain
+  def simInit(): Unit
+  def Driver(): Unit
+  def Monitor(): Unit
+//  def refModule(): Unit
 
-  def socreBoard():Unit = {
-    fork{
-      while (!stop){
+  def scoreBoard(): Unit = {
+    val score = fork {
+      while (!stop) {
         if (refQueue.nonEmpty && resQueue.nonEmpty) {
           val drvData = drvMon.dequeue()
-          val calRes = resQueue.dequeue()
-          val calRef = refQueue.dequeue()
-          assert(calRes == calRef,s"data mismatch input:${drvData} res:${calRes}  ref:${calRef}")
+          val calRes  = resQueue.dequeue()
+          val calRef  = refQueue.dequeue()
+//          println(s"data:${drvData} res:${calRes}  ref:${calRef}")
+          assert(calRes == calRef, s"data mismatch input:${drvData} res:${calRes}  ref:${calRef}")
         }
-        clockDomain.waitSampling()
+        dutClockDomain.waitSampling()
       }
     }
   }
 
   def waitSimDone(): Unit = {
-    clockDomain.waitSampling(10)
+    dutClockDomain.waitSampling(10)
     while (refQueue.nonEmpty || resQueue.nonEmpty) {
-      clockDomain.waitSampling(10)
+      dutClockDomain.waitSampling(10)
     }
     stop = true
-    clockDomain.waitSampling(10)
+    dutClockDomain.waitSampling(10)
     println("sim finish")
     simSuccess()
   }
 
   def waitClean(): Unit = {
-    clockDomain.waitSampling(10)
+    dutClockDomain.waitSampling(10)
     while (refQueue.nonEmpty || resQueue.nonEmpty) {
-      clockDomain.waitSampling(1)
+      dutClockDomain.waitSampling(1)
     }
-    clockDomain.waitSampling(10)
+    dutClockDomain.waitSampling(10)
   }
 
   def insertData(test: I): Unit = {
     drvQueue.enqueue(test)
     drvMon.enqueue(test)
   }
-  
+  def simEnvStart(): Unit       = {
+    simInit()
+    Driver()
+    Monitor()
+    scoreBoard()
+  }
 
 }
