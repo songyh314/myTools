@@ -53,6 +53,7 @@ case class XilinxNonProjectFlow(
     script += "add_files -fileset constrs_1 ./doit.xdc\n"
     if (xcix != null) {
       script += xcix.map { item => s"add_files {$item}" }.mkString("\n")
+      script += "\n"
     }
     script += "import_files -force\n"
 

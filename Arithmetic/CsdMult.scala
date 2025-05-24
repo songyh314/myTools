@@ -51,7 +51,7 @@ object MultUtils {
   }
 }
 
-case class constMulCSD(width: Int = 8, const: Int, groupSize: Int = 3) extends Component {
+case class constMulCSD(width: Int = 8, const: BigInt, groupSize: Int = 3) extends Component {
   import MultUtils._
 
   val io = new Bundle {
