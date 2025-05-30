@@ -15,7 +15,8 @@ trait simEnv {
   @volatile var stop: Boolean = false
 
   val dutClockDomain: ClockDomain
-  val enableAssert:Boolean
+  val enableAssert: Boolean
+  val showComp: Boolean = false
   def simInit(): Unit
   def Driver(): Unit
   def Monitor(): Unit
@@ -28,8 +29,10 @@ trait simEnv {
           val drvData = drvMon.dequeue()
           val calRes  = resQueue.dequeue()
           val calRef  = refQueue.dequeue()
-//          println(s"data:${drvData} res:${calRes}  ref:${calRef}")
-          if (enableAssert){
+          if (showComp) {
+            println(s"data:${drvData} res:${calRes}  ref:${calRef}")
+          }
+          if (enableAssert) {
             assert(calRes == calRef, s"data mismatch input:${drvData} res:${calRes}  ref:${calRef}")
 
           }
