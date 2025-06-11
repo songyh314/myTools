@@ -1,4 +1,5 @@
 package myTools.Arithmetic
+
 import spinal.core._
 import spinal.lib._
 
@@ -6,13 +7,13 @@ import scala.language.postfixOps
 
 object MultUtils {
   def csdEncode(n: BigInt): (Seq[Int], Seq[Int]) = {
-    var x     = n
-    var pos   = 0
-    val plus  = scala.collection.mutable.Buffer[Int]()
+    var x = n
+    var pos = 0
+    val plus = scala.collection.mutable.Buffer[Int]()
     val minus = scala.collection.mutable.Buffer[Int]()
 
     while (x != 0) {
-      val bit     = x & 1
+      val bit = x & 1
       val nextBit = (x >> 1) & 1
       if (bit == 0) {
         // 当前位为0，跳过
@@ -32,13 +33,13 @@ object MultUtils {
         x = x >> 1
       }
     }
-    (plus, minus)
+    (plus.toSeq, minus.toSeq)
   }
 
   // 示例
 
   def main(args: Array[String]): Unit = {
-    val n             = 7137274
+    val n = 7137274
     val (plus, minus) = csdEncode(n)
 
     println(s"Input number: $n, Bin: ${n.toBinaryString}")
@@ -52,10 +53,11 @@ object MultUtils {
 }
 
 case class constMulCSD(width: Int = 8, const: BigInt, groupSize: Int = 3) extends Component {
+
   import MultUtils._
 
   val io = new Bundle {
-    val dataIn  = slave Flow UInt(width bits)
+    val dataIn = slave Flow UInt(width bits)
     val dataOut = master Flow UInt(2 * width bits)
   }
 
@@ -65,23 +67,23 @@ case class constMulCSD(width: Int = 8, const: BigInt, groupSize: Int = 3) extend
   println(s"Input number: $const, Bin: ${const.toString(2)}")
   println(s"+ ops at shifts: ${plus.mkString(", ")}")
   println(s"- ops at shifts: ${minus.mkString(", ")}")
-  val AddSeq        = plus
+  val AddSeq = plus
     .grouped(groupSize)
     .map(item => {
       val tmpAdd = item.map(i => io.dataIn.payload << i).reduceBalancedTree(_ +^ _)
       RegNext(tmpAdd)
     })
     .toSeq
-  val SubSeq        = minus
+  val SubSeq = minus
     .grouped(groupSize)
     .map(item => {
       val tmpSub = item.map(i => io.dataIn.payload << i).reduceBalancedTree(_ +^ _)
       RegNext(tmpSub)
     })
     .toSeq
-  val ret           = Reg(UInt(2 * width bits))
-  val tmpRet        = AddSeq.reduceBalancedTree(_ +^ _) - SubSeq.reduceBalancedTree(_ +^ _)
-  ret                := tmpRet.resized
+  val ret = Reg(UInt(2 * width bits))
+  val tmpRet = AddSeq.reduceBalancedTree(_ +^ _) - SubSeq.reduceBalancedTree(_ +^ _)
+  ret := tmpRet.resized
   io.dataOut.payload := ret
-  io.dataOut.valid   := Delay(io.dataIn.valid, 2)
+  io.dataOut.valid := Delay(io.dataIn.valid, 2)
 }
