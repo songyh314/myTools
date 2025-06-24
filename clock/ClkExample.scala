@@ -78,8 +78,3 @@ object GenV_2 extends App {
   )
 }
 
-object TestDiv extends App {
-  val top = new ClkExample()
-  getUniqueClockDomainSummariesAndPrint(top)
-}
-

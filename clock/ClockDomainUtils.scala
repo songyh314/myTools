@@ -88,7 +88,7 @@ object ClockDomainUtils {
           config = cd.config.copy()
         )
         ClockDomainUtils.register(newCD, cd, "divBy", Some(div))
-        newCD.clock.setName(s"${cd.clock.name}_divBy_$div")
+        newCD.clock.setName(s"${cd.clock.name}_div$div")
         newCD
       }
       dividerArea.newCD
