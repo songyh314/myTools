@@ -42,7 +42,7 @@ abstract class BaseDriver[T <: Transaction](val hook: Option[DriverHook[T]] = No
         //        clockDomain.waitSampling()
         sequencer.selectNext() match {
           case Some(tx: T) =>
-            println(s"Driver ${this.getClass.getSimpleName} driving transaction: $tx")
+//            println(s"Driver ${this.getClass.getSimpleName} driving transaction: $tx")
             hook.foreach(_.preDrv(tx))
             drive(tx)
             push(tx) // 将事务推送到 Scoreboard

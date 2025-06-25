@@ -50,7 +50,7 @@ case class Sequence(val priority: Int) {
   def doItem(tx: Transaction)(init: Transaction => Unit = _ => ()): Unit = {
     init(tx)
     enqueue(tx)
-//    println(s"[${this}] doItem: ${tx}")
+    println(s"[${this}] doItem: ${tx}")
   }
 
   override def toString: String = this.getClass.getSimpleName
@@ -94,17 +94,7 @@ class Sequencer extends ISequencer {
     }
   }
 
-//  override def selectNext(): Option[Transaction] = synchronized {
-//    lockedSequence match {
-//      case Some(seq) if seq.hasPending => seq.getNext
-//      case _ =>
-//        sequences
-//          .filter(s => s.hasPending && !s.isLocked)
-//          .sortBy(-_.priority)
-//          .flatMap(_.getNext)
-//          .headOption
-//    }
-//  }
+
 override def selectNext(): Option[Transaction] = synchronized {
   // 优先处理 locked sequence
   lockedSequence match {

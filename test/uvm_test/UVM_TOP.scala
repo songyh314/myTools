@@ -70,11 +70,11 @@ class MyTop(dut: DUT) {
 
   val myScoreboard = new MyScoreboard(myRefModel()).withClockDomain(dut.clockDomain)
   val mySequencer = new Sequencer
-  //  val seq_1 = Sequence(priority = 1)
+  val seq_1 = Sequence(priority = 1)
   val seq_2 = Sequence(priority = 2)
-  //  (0 until 128).foreach(_ => seq_1.doItem(myTx())(_.randomize()))
+  (0 until 128).foreach(_ => seq_1.doItem(myTx())(_.randomize()))
   (0 until 128).foreach(i => seq_2.doItem(myTx(i))())
-  //  mySequencer.register(seq_1)
+  mySequencer.register(seq_1)
   mySequencer.register(seq_2)
 
   // 定义外部的驱动函数
@@ -83,7 +83,7 @@ class MyTop(dut: DUT) {
     io.din.valid #= true
     clockDomain.waitSampling()
     io.din.valid #= false
-    println(s"Driver drove: ${tx.din.get} -> ${io.din.payload.toBigInt}")
+//    println(s"Driver drove: ${tx.din.get} -> ${io.din.payload.toBigInt}")
   }
 
 
@@ -100,7 +100,7 @@ class MyTop(dut: DUT) {
     clockDomain.waitActiveEdgeWhere(io.dout.valid.toBoolean)
     val tx = myTx()
     tx.dout = Some(io.dout.payload.toBigInt)
-    println(s"Monitor sampled: ${tx.dout}")
+//    println(s"Monitor sampled: ${tx.dout}")
     Some(tx)
   }
   val mon = MyMonitor(
